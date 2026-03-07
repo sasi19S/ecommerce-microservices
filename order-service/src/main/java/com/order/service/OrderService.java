@@ -19,6 +19,7 @@ public class OrderService {
     }
 
     public Order create(Order order) {
+        System.out.println("OrderService: create ");
         order.setStatus("CREATED");
 
         Order saved = repo.save(order);
