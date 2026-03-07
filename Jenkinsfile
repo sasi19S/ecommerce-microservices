@@ -258,7 +258,6 @@ pipeline {
             steps {
                 echo "Restarting containers..."
                 sh 'docker compose down || true'
-                sh 'docker compose pull || true'
                 sh 'docker compose up -d'
             }
         }
