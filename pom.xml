@@ -45,6 +45,12 @@
                         <target>11</target>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>9.1.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
