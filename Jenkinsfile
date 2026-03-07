@@ -40,15 +40,15 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo "Building Docker images..."
-                sh 'docker-compose build'
+                sh 'docker compose build'
             }
         }
 
         stage('Run Containers') {
             steps {
                 echo "Restarting containers..."
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
+                sh 'docker compose down || true'
+                sh 'docker compose up -d'
             }
         }
 
@@ -58,11 +58,12 @@ pipeline {
                 sh 'docker ps'
             }
         }
+    }
 
-        post {
-            always {
-                cleanWs()
-            }
+    post {
+        always {
+            echo "Cleaning Jenkins workspace after build..."
+            cleanWs()
         }
     }
 }
