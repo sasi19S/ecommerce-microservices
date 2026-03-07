@@ -122,7 +122,7 @@ pipeline {
 
                 echo "Running OWASP dependency scan..."
 
-                dependencyCheck additionalArguments: '--scan .',
+                dependencyCheck additionalArguments: '--scan . --format ALL',
                                 odcInstallation: 'OWASP-DC'
 
                 dependencyCheckPublisher pattern: '**/dependency-check-report.*'
