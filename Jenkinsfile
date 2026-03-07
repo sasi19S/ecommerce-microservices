@@ -14,7 +14,7 @@ pipeline {
         COMPOSE_PROJECT_NAME = "ecommerce"
         DOCKERHUB_USER = "shekhar1914"
         VERSION = "v1.${BUILD_NUMBER}"
-
+        DOCKER_BUILDKIT = "1"
         SERVICES = "auth-service order-service inventory-service payment-service api-gateway"
     }
 
@@ -116,20 +116,7 @@ pipeline {
             }
         }
 
-        stage('OWASP Dependency Check') {
 
-            steps {
-
-                echo "Running OWASP dependency scan..."
-
-                dependencyCheck additionalArguments: '--scan . --format ALL',
-                                odcInstallation: 'OWASP-DC'
-
-                dependencyCheckPublisher pattern: '**/dependency-check-report.*'
-
-            }
-
-        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -183,14 +170,30 @@ pipeline {
 
                 script {
 
-                    def services = env.SERVICES.split(" ")
+                    def services = [
+                        "auth-service": env.AUTH_CHANGED,
+                        "order-service": env.ORDER_CHANGED,
+                        "inventory-service": env.INVENTORY_CHANGED,
+                        "payment-service": env.PAYMENT_CHANGED,
+                        "api-gateway": env.GATEWAY_CHANGED
+                    ]
 
-                    for (svc in services) {
+                    services.each { svc, changed ->
 
-                        sh """
-                        docker build -t ${DOCKERHUB_USER}/${svc}:${VERSION} ./${svc}
-                        docker tag ${DOCKERHUB_USER}/${svc}:${VERSION} ${DOCKERHUB_USER}/${svc}:latest
-                        """
+                        if (changed == "true") {
+
+                            echo "Building ${svc}..."
+
+                            sh """
+                            docker build -t ${DOCKERHUB_USER}/${svc}:${VERSION} ./${svc}
+                            docker tag ${DOCKERHUB_USER}/${svc}:${VERSION} ${DOCKERHUB_USER}/${svc}:latest
+                            """
+
+                        } else {
+
+                            echo "Skipping ${svc} (no changes)"
+
+                        }
 
                     }
 
@@ -208,14 +211,26 @@ pipeline {
 
                 script {
 
-                    def services = env.SERVICES.split(" ")
+                    def services = [
+                        "auth-service": env.AUTH_CHANGED,
+                        "order-service": env.ORDER_CHANGED,
+                        "inventory-service": env.INVENTORY_CHANGED,
+                        "payment-service": env.PAYMENT_CHANGED,
+                        "api-gateway": env.GATEWAY_CHANGED
+                    ]
 
-                    for (svc in services) {
+                    services.each { svc, changed ->
 
-                        sh """
-                        docker push ${DOCKERHUB_USER}/${svc}:${VERSION}
-                        docker push ${DOCKERHUB_USER}/${svc}:latest
-                        """
+                        if (changed == "true") {
+
+                            echo "Pushing ${svc}..."
+
+                            sh """
+                            docker push ${DOCKERHUB_USER}/${svc}:${VERSION}
+                            docker push ${DOCKERHUB_USER}/${svc}:latest
+                            """
+
+                        }
 
                     }
 

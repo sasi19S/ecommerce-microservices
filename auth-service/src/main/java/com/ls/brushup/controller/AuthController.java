@@ -16,7 +16,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody User user) {
-
+        System.out.prinln("AuthController: login");
         // dummy validation
         if ("admin".equals(user.getUsername()) && "password".equals(user.getPassword())) {
             return jwtUtil.generateToken(user.getUsername());
