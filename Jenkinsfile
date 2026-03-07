@@ -31,6 +31,35 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/sasi19S/ecommerce-microservices.git'
             }
         }
+        stage('Detect Changed Services') {
+            steps {
+                script {
+
+                    def changedFiles = sh(
+                        script: "git diff --name-only HEAD~1 HEAD || true",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Changed files: ${changedFiles}"
+
+                    env.AUTH_CHANGED = changedFiles.contains("auth-service") ? "true" : "false"
+                    env.ORDER_CHANGED = changedFiles.contains("order-service") ? "true" : "false"
+                    env.INVENTORY_CHANGED = changedFiles.contains("inventory-service") ? "true" : "false"
+                    env.PAYMENT_CHANGED = changedFiles.contains("payment-service") ? "true" : "false"
+                    env.GATEWAY_CHANGED = changedFiles.contains("api-gateway") ? "true" : "false"
+
+                    // If nothing detected (first build) build all
+                    if (!changedFiles) {
+                        env.AUTH_CHANGED = "true"
+                        env.ORDER_CHANGED = "true"
+                        env.INVENTORY_CHANGED = "true"
+                        env.PAYMENT_CHANGED = "true"
+                        env.GATEWAY_CHANGED = "true"
+                    }
+
+                }
+            }
+        }
 
         stage('Build Microservices') {
             steps {
@@ -86,61 +115,157 @@ pipeline {
        }
 
         stage('Build Docker Images') {
-            steps {
 
-                echo "Building Docker images..."
+            parallel {
 
-                sh """
-                docker build -t ${DOCKERHUB_USER}/auth-service:${VERSION} ./auth-service
-                docker build -t ${DOCKERHUB_USER}/order-service:${VERSION} ./order-service
-                docker build -t ${DOCKERHUB_USER}/inventory-service:${VERSION} ./inventory-service
-                docker build -t ${DOCKERHUB_USER}/payment-service:${VERSION} ./payment-service
-                docker build -t ${DOCKERHUB_USER}/api-gateway:${VERSION} ./api-gateway
-                """
+                stage('Auth Service') {
+
+                    when {
+                        expression { env.AUTH_CHANGED == "true" }
+                    }
+
+                    steps {
+
+                        sh """
+                        docker build -t ${DOCKERHUB_USER}/auth-service:${VERSION} ./auth-service
+                        docker tag ${DOCKERHUB_USER}/auth-service:${VERSION} ${DOCKERHUB_USER}/auth-service:latest
+                        """
+
+                    }
+
+                }
+
+                stage('Order Service') {
+
+                    when {
+                        expression { env.ORDER_CHANGED == "true" }
+                    }
+
+                    steps {
+
+                        sh """
+                        docker build -t ${DOCKERHUB_USER}/order-service:${VERSION} ./order-service
+                        docker tag ${DOCKERHUB_USER}/order-service:${VERSION} ${DOCKERHUB_USER}/order-service:latest
+                        """
+
+                    }
+
+                }
+
+                stage('Inventory Service') {
+
+                    when {
+                        expression { env.INVENTORY_CHANGED == "true" }
+                    }
+
+                    steps {
+
+                        sh """
+                        docker build -t ${DOCKERHUB_USER}/inventory-service:${VERSION} ./inventory-service
+                        docker tag ${DOCKERHUB_USER}/inventory-service:${VERSION} ${DOCKERHUB_USER}/inventory-service:latest
+                        """
+
+                    }
+
+                }
+
+                stage('Payment Service') {
+
+                    when {
+                        expression { env.PAYMENT_CHANGED == "true" }
+                    }
+
+                    steps {
+
+                        sh """
+                        docker build -t ${DOCKERHUB_USER}/payment-service:${VERSION} ./payment-service
+                        docker tag ${DOCKERHUB_USER}/payment-service:${VERSION} ${DOCKERHUB_USER}/payment-service:latest
+                        """
+
+                    }
+
+                }
+
+                stage('API Gateway') {
+
+                    when {
+                        expression { env.GATEWAY_CHANGED == "true" }
+                    }
+
+                    steps {
+
+                        sh """
+                        docker build -t ${DOCKERHUB_USER}/api-gateway:${VERSION} ./api-gateway
+                        docker tag ${DOCKERHUB_USER}/api-gateway:${VERSION} ${DOCKERHUB_USER}/api-gateway:latest
+                        """
+
+                    }
+
+                }
+
             }
+
         }
 
-        stage('Tag Docker Images') {
-            steps {
 
-                echo "Tagging images with latest..."
 
-                sh """
-                docker tag ${DOCKERHUB_USER}/auth-service:${VERSION} ${DOCKERHUB_USER}/auth-service:latest
-                docker tag ${DOCKERHUB_USER}/order-service:${VERSION} ${DOCKERHUB_USER}/order-service:latest
-                docker tag ${DOCKERHUB_USER}/inventory-service:${VERSION} ${DOCKERHUB_USER}/inventory-service:latest
-                docker tag ${DOCKERHUB_USER}/payment-service:${VERSION} ${DOCKERHUB_USER}/payment-service:latest
-                docker tag ${DOCKERHUB_USER}/api-gateway:${VERSION} ${DOCKERHUB_USER}/api-gateway:latest
-                """
-            }
-        }
-
-        stage('Push Images To DockerHub') {
+        stage('Push Images') {
 
             steps {
 
-                echo "Pushing images to DockerHub..."
+                script {
 
-                sh """
+                    if (env.AUTH_CHANGED == "true") {
 
-                docker push ${DOCKERHUB_USER}/auth-service:${VERSION}
-                docker push ${DOCKERHUB_USER}/auth-service:latest
+                        sh """
+                        docker push ${DOCKERHUB_USER}/auth-service:${VERSION}
+                        docker push ${DOCKERHUB_USER}/auth-service:latest
+                        """
 
-                docker push ${DOCKERHUB_USER}/order-service:${VERSION}
-                docker push ${DOCKERHUB_USER}/order-service:latest
+                    }
 
-                docker push ${DOCKERHUB_USER}/inventory-service:${VERSION}
-                docker push ${DOCKERHUB_USER}/inventory-service:latest
+                    if (env.ORDER_CHANGED == "true") {
 
-                docker push ${DOCKERHUB_USER}/payment-service:${VERSION}
-                docker push ${DOCKERHUB_USER}/payment-service:latest
+                        sh """
+                        docker push ${DOCKERHUB_USER}/order-service:${VERSION}
+                        docker push ${DOCKERHUB_USER}/order-service:latest
+                        """
 
-                docker push ${DOCKERHUB_USER}/api-gateway:${VERSION}
-                docker push ${DOCKERHUB_USER}/api-gateway:latest
-                """
+                    }
+
+                    if (env.INVENTORY_CHANGED == "true") {
+
+                        sh """
+                        docker push ${DOCKERHUB_USER}/inventory-service:${VERSION}
+                        docker push ${DOCKERHUB_USER}/inventory-service:latest
+                        """
+
+                    }
+
+                    if (env.PAYMENT_CHANGED == "true") {
+
+                        sh """
+                        docker push ${DOCKERHUB_USER}/payment-service:${VERSION}
+                        docker push ${DOCKERHUB_USER}/payment-service:latest
+                        """
+
+                    }
+
+                    if (env.GATEWAY_CHANGED == "true") {
+
+                        sh """
+                        docker push ${DOCKERHUB_USER}/api-gateway:${VERSION}
+                        docker push ${DOCKERHUB_USER}/api-gateway:latest
+                        """
+
+                    }
+
+                }
+
             }
+
         }
-        
+
 
         stage('Run Containers') {
             steps {
