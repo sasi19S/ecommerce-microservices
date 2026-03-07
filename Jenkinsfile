@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/sasi19S/ecommerce-microservices.git'
+                git branch: 'main', url: 'https://github.com/sasi19S/ecommerce-microservices.git'
             }
         }
 
