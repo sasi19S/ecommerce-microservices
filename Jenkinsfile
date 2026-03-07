@@ -52,13 +52,13 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     script {
                         def qg = waitForQualityGate()
                         echo "Quality Gate Status: ${qg.status}"
 
                         if (qg.status != 'OK') {
-                            echo "Quality gate failed but pipeline continues"
+                            echo "Quality gate failed but continuing pipeline"
                             currentBuild.result = 'UNSTABLE'
                         }
                     }
