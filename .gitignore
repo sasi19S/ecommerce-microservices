@@ -1,0 +1,23 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build
+target/
+build/
+.gradle/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+
+# Maven wrapper logs
+.mvn/wrapper/maven-wrapper.jar

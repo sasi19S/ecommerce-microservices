@@ -1,0 +1,21 @@
+server:
+  port: 8085
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: http://order-service:8082
+          predicates:
+            - Path=/orders/**
+
+        - id: inventory-service
+          uri: http://inventory-service:8083
+          predicates:
+            - Path=/inventory/**
+
+        - id: payment-service
+          uri: http://payment-service:8084
+          predicates:
+            - Path=/payment/**
