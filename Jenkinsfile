@@ -58,5 +58,11 @@ pipeline {
                 sh 'docker ps'
             }
         }
+
+        post {
+            always {
+                cleanWs()
+            }
+        }
     }
 }
