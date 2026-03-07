@@ -41,13 +41,11 @@ pipeline {
             steps {
                 echo "Running SonarQube analysis..."
 
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh """
-                    mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
-                    -Dsonar.projectKey=ecommerce-microservices \
-                    -Dsonar.host.url=http://host.docker.internal:9000 \
-                    -Dsonar.login=$SONAR_TOKEN
-                    """
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=ecommerce-microservices
+                    '''
                 }
             }
         }
