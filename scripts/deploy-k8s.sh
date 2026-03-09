@@ -1,0 +1,1 @@
+kubectl apply -R -f infra/k8s

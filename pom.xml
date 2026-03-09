@@ -26,12 +26,12 @@
     </properties>
 
     <modules>
-        <module>auth-service</module>
-        <module>order-service</module>
-        <module>inventory-service</module>
-        <module>payment-service</module>
-        <module>api-gateway</module>
-    </modules>
+    <module>services/auth-service</module>
+    <module>services/order-service</module>
+    <module>services/inventory-service</module>
+    <module>services/payment-service</module>
+    <module>services/api-gateway</module>
+</modules>
 
     <build>
         <pluginManagement>

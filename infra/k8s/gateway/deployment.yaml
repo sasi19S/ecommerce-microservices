@@ -16,5 +16,6 @@ spec:
       containers:
         - name: api-gateway
           image: shekhar1914/api-gateway:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8085
