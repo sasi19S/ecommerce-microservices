@@ -13,50 +13,12 @@ services:
       - zookeeper
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    
-      # 🔥 IMPORTANT (2 listeners)
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-    
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  auth-service:
-    build: ./auth-service
-    ports:
-      - "8080:8080"
-    depends_on:
-      - kafka
-
-  order-service:
-    build: ./order-service
-    ports:
-      - "8082:8082"
-    depends_on:
-      - kafka
-
-  inventory-service:
-    build: ./inventory-service
-    ports:
-      - "8083:8083"
-    depends_on:
-      - kafka
-
-  payment-service:
-    build: ./payment-service
-    ports:
-      - "8084:8084"
-    depends_on:
-      - kafka
-
-  api-gateway:
-    build: ./api-gateway
-    ports:
-      - "8085:8085"
-    depends_on:
-      - kafka
-      
   postgres:
     image: postgres:16
     environment:
@@ -66,4 +28,41 @@ services:
     ports:
       - "5433:5432"
 
-  
+  auth-service:
+    build: ../../services/auth-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - postgres
+
+  order-service:
+    build: ../../services/order-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - kafka
+      - postgres
+
+  inventory-service:
+    build: ../../services/inventory-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - postgres
+
+  payment-service:
+    build: ../../services/payment-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - kafka
+      - postgres
+
+  api-gateway:
+    build: ../../services/api-gateway
+    ports:
+      - "8085:8085"
+    depends_on:
+      - auth-service
