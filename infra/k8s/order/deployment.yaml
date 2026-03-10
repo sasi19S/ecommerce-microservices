@@ -4,7 +4,7 @@ metadata:
   name: order-service
   namespace: ecommerce
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: order-service
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: shekhar1914/order-service:latest
+          image: shekhar1914/order-service:v1.32
           ports:
             - containerPort: 8082
           env:

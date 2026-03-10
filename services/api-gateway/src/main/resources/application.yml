@@ -25,3 +25,12 @@ spring:
           uri: http://payment-service:8084
           predicates:
             - Path=/payment/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ls.brushup.util.JwtUtil;
 import com.ls.brushup.model.User;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/auth")
@@ -15,13 +16,14 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+public ResponseEntity<?> login(@RequestBody User user) {
+    try {
         System.out.println("AuthController: login");
-        // dummy validation
-        if ("admin".equals(user.getUsername()) && "password".equals(user.getPassword())) {
-            return jwtUtil.generateToken(user.getUsername());
-        }
-
-        throw new RuntimeException("Invalid credentials");
+        String token = jwtUtil.generateToken(user.getUsername());
+        return ResponseEntity.ok(token);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.internalServerError().body(e.getMessage());
     }
+}
 }

@@ -4,7 +4,7 @@ metadata:
   name: payment-service
   namespace: ecommerce
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: payment-service
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: shekhar1914/payment-service:latest
+          image: shekhar1914/payment-service:v1.32
           ports:
             - containerPort: 8084
           env:

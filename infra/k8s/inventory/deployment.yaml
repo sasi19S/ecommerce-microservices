@@ -4,7 +4,7 @@ metadata:
   name: inventory-service
   namespace: ecommerce
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: inventory-service
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: inventory-service
-          image: shekhar1914/inventory-service:latest
+          image: shekhar1914/inventory-service:v1.32
           ports:
             - containerPort: 8083
           env:
